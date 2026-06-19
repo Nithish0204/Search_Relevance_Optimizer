@@ -1,3 +1,4 @@
+import API_BASE_URL from "../config";
 function ProductTable({ products }) {
   return (
     <table className="product-table">
@@ -56,29 +57,52 @@ function ProductTable({ products }) {
 
             <td>
 
-              <button
-                className="edit-btn"
-                onClick={() =>
-                  alert(
-                    "Edit " +
-                    product.title
-                  )
-                }
-              >
-                Edit
-              </button>
 
               <button
-                className="delete-btn"
-                onClick={() =>
-                  alert(
-                    "Delete " +
-                    product.title
-                  )
-                }
-              >
-                Delete
-              </button>
+  className="delete-btn"
+  onClick={async () => {
+
+    const confirmDelete =
+      window.confirm(
+        `Delete ${product.title}?`
+      );
+
+    if (!confirmDelete) return;
+
+    try {
+
+      const response = await fetch(
+        `${API_BASE_URL}/products/${product.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "ngrok-skip-browser-warning":
+              "true"
+          }
+        }
+      );
+
+      const data =
+        await response.json();
+
+      alert(data.message);
+
+      window.location.reload();
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(
+        "Failed to delete product"
+      );
+
+    }
+
+  }}
+>
+  Delete
+</button>
 
             </td>
 
