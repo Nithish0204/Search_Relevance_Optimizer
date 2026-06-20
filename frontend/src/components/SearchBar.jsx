@@ -1,10 +1,20 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function SearchBar() {
+
+  const [query, setQuery] = useState("");
+
   const navigate = useNavigate();
 
   const handleSearch = () => {
-    navigate("/results");
+
+    if (!query.trim()) return;
+
+    navigate(
+      `/results?q=${encodeURIComponent(query)}`
+    );
+
   };
 
   return (
@@ -14,6 +24,10 @@ function SearchBar() {
         type="text"
         placeholder="Search Nike shoes, AirPods, laptops..."
         className="search-input"
+        value={query}
+        onChange={(e) =>
+          setQuery(e.target.value)
+        }
       />
 
       <button

@@ -3,11 +3,14 @@ function ProductCard({ product }) {
     <div className="product-card">
 
       <img
-        src={product.image}
-        alt={product.name}
+        src={
+          product.image_url ||
+          "https://placehold.co/300x300?text=No+Image"
+        }
+        alt={product.title}
       />
 
-      <h3>{product.name}</h3>
+      <h3>{product.title}</h3>
 
       <p className="price">
         ₹{product.price}
@@ -22,7 +25,15 @@ function ProductCard({ product }) {
       </p>
 
       <p>
-        {product.stock ? "In Stock" : "Out of Stock"}
+        Category: {product.category}
+      </p>
+
+      <p>
+        {
+          product.in_stock
+            ? "In Stock"
+            : "Out of Stock"
+        }
       </p>
 
       <button>

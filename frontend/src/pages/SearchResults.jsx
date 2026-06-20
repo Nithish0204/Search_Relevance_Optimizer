@@ -1,59 +1,83 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+
 import Navbar from "../components/Navbar";
 import Filters from "../components/Filters";
 import ProductCard from "../components/ProductCard";
 
+import API_BASE_URL from "../config";
+
 function SearchResults() {
 
-  const [selectedBrand, setSelectedBrand] = useState("");
-  const [selectedRating, setSelectedRating] = useState(0);
+  const [searchParams] =
+    useSearchParams();
 
-  const products = [
-    {
-      id: 1,
-      name: "Nike Air Max",
-      price: 4999,
-      rating: 4.5,
-      brand: "Nike",
-      stock: true,
-      image:
-        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500"
-    },
+  const query =
+    searchParams.get("q") || "";
 
-    {
-      id: 2,
-      name: "Boat Airdopes 141",
-      price: 1299,
-      rating: 4.2,
-      brand: "Boat",
-      stock: true,
-      image:
-        "https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?w=500"
-    },
+  const [products, setProducts] =
+    useState([]);
 
-    {
-      id: 3,
-      name: "Apple AirPods Pro",
-      price: 24999,
-      rating: 4.8,
-      brand: "Apple",
-      stock: true,
-      image:
-        "https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=500"
-    }
-  ];
+  const [loading, setLoading] =
+    useState(true);
 
-  const filteredProducts = products.filter((product) => {
+  const [selectedBrand,
+    setSelectedBrand] =
+    useState("");
 
-    const brandMatch =
-      selectedBrand === "" ||
-      product.brand === selectedBrand;
+  const [selectedRating,
+    setSelectedRating] =
+    useState(0);
 
-    const ratingMatch =
-      product.rating >= selectedRating;
+  useEffect(() => {
 
-    return brandMatch && ratingMatch;
-  });
+    fetch(
+      `${API_BASE_URL}/search?q=${query}`,
+      {
+        headers: {
+          "ngrok-skip-browser-warning":
+            "true"
+        }
+      }
+    )
+      .then((response) =>
+        response.json()
+      )
+      .then((data) => {
+
+        setProducts(
+          data.results || []
+        );
+
+        setLoading(false);
+
+      })
+      .catch((error) => {
+
+        console.error(error);
+
+        setLoading(false);
+
+      });
+
+  }, [query]);
+
+  const filteredProducts =
+    products.filter((product) => {
+
+      const brandMatch =
+        selectedBrand === "" ||
+        product.brand === selectedBrand;
+
+      const ratingMatch =
+        product.rating >=
+        selectedRating;
+
+      return (
+        brandMatch &&
+        ratingMatch
+      );
+    });
 
   return (
     <div className="results-page">
@@ -61,26 +85,52 @@ function SearchResults() {
       <Navbar />
 
       <h1 className="results-title">
-        Search Results
+        Results for "{query}"
       </h1>
 
       <div className="results-layout">
 
         <Filters
-          selectedBrand={selectedBrand}
-          setSelectedBrand={setSelectedBrand}
-          selectedRating={selectedRating}
-          setSelectedRating={setSelectedRating}
+          selectedBrand={
+            selectedBrand
+          }
+          setSelectedBrand={
+            setSelectedBrand
+          }
+          selectedRating={
+            selectedRating
+          }
+          setSelectedRating={
+            setSelectedRating
+          }
         />
 
         <div className="products-container">
 
-          {filteredProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-            />
-          ))}
+          {loading ? (
+
+            <h2>
+              Loading...
+            </h2>
+
+          ) : (
+
+            filteredProducts.map(
+              (product) => (
+
+                <ProductCard
+                  key={
+                    product.id
+                  }
+                  product={
+                    product
+                  }
+                />
+
+              )
+            )
+
+          )}
 
         </div>
 
