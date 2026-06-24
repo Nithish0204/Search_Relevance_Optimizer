@@ -77,17 +77,10 @@ def get_single_product(product_id: str):
 
 
 async def index_to_elasticsearch(mongo_id: str, product: dict):
-    """
-    PLACEHOLDER for now. Real version (from teammate's search/indexer.py)
-    will generate an embedding and push the product into Elasticsearch.
-    Logging failures to MongoDB so nothing is silently lost, exactly like
-    the architecture doc describes.
-    """
+    
     try:
         print(f"[stub] would index product {mongo_id} into Elasticsearch")
-        # Real version later:
-        # from search.indexer import index_product
-        # await index_product(mongo_id, product, app.state.model)
+        
     except Exception as e:
         products_collection.database["sync_failures"].insert_one({
             "mongo_id": mongo_id,
