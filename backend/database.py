@@ -8,6 +8,6 @@ load_dotenv(os.path.join(root_dir, ".env"))
 
 # Use tlsAllowInvalidCertificates=True so MacOS doesn't complain about Atlas SSL certs locally
 client = MongoClient(os.getenv("MONGO_URI"), tlsAllowInvalidCertificates=True)
-db_name = os.getenv("MONGO_DB", "search_optimizer")
+db_name = os.getenv("MONGO_DB", "ecommerce_search")
 db = client[db_name]
 products_collection = db["products"]
