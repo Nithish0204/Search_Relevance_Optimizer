@@ -4,7 +4,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from bson import ObjectId
 from database import products_collection
-from parser import extract_filters
+from database import products_collection
+import sys
+import os
+import asyncio
+
+# Add project root to Python path so we can import the nlp module
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from nlp.parser import parse_query
+from nlp.vectorizer import get_query_vector
+from nlp.es_search import search_products
+from nlp.es_indexer import index_product
+from nlp.registry import force_refresh
 
 class Product(BaseModel):
     title: str = Field(..., min_length=1)
@@ -76,23 +88,17 @@ def get_single_product(product_id: str):
     return {"success": True, "product": product}
 
 
-async def index_to_elasticsearch(mongo_id: str, product: dict):
-    
-    try:
-        print(f"[stub] would index product {mongo_id} into Elasticsearch")
-        
-    except Exception as e:
-        products_collection.database["sync_failures"].insert_one({
-            "mongo_id": mongo_id,
-            "error": str(e)
-        })
+def run_index_product(mongo_id: str, product_dict: dict):
+    """Wrapper to run the async index_product function in a separate event loop"""
+    asyncio.run(index_product(mongo_id, product_dict, None))
 
 
 @app.post("/products")
 def add_product(product: Product, bg: BackgroundTasks):
     result = products_collection.insert_one(product.dict())
     mongo_id = str(result.inserted_id)
-    bg.add_task(index_to_elasticsearch, mongo_id, product.dict())
+    bg.add_task(run_index_product, mongo_id, product.dict())
+    bg.add_task(force_refresh)
     return {"success": True, "message": "Product added successfully", "id": mongo_id}
 
 
@@ -128,19 +134,15 @@ def search_products_route(q: str = Query(..., min_length=1, max_length=200)):
     if cached:
         return cached
 
-    filters = extract_filters(q)
-    results = []
-    for r in products_collection.find(filters):
-        r["id"] = str(r["_id"])
-        del r["_id"]
-        results.append(r)
+    parsed = parse_query(q)
+    vector = get_query_vector(parsed.keywords, q)
+    results = search_products(parsed, vector)
 
     response = {
         "results": results,
         "total": len(results),
         "query": q,
-        "filters_applied": filters,
-        "corrected_query": None  # will come from real parser later
+        "corrected_query": parsed.corrected_query
     }
     set_cache(cache_key, response)
     return response
