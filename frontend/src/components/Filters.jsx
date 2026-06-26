@@ -15,6 +15,15 @@ function Filters({
         <input
           type="radio"
           name="brand"
+          onChange={() => setSelectedBrand("")}
+        />
+        All Brands
+      </label>
+
+      <label>
+        <input
+          type="radio"
+          name="brand"
           onChange={() => setSelectedBrand("Nike")}
         />
         Nike
@@ -24,27 +33,18 @@ function Filters({
         <input
           type="radio"
           name="brand"
-          onChange={() => setSelectedBrand("Boat")}
+          onChange={() => setSelectedBrand("Sony")}
         />
-        Boat
+        Sony
       </label>
 
       <label>
         <input
           type="radio"
           name="brand"
-          onChange={() => setSelectedBrand("Apple")}
+          onChange={() => setSelectedBrand("Adidas")}
         />
-        Apple
-      </label>
-
-      <label>
-        <input
-          type="radio"
-          name="brand"
-          onChange={() => setSelectedBrand("")}
-        />
-        All Brands
+        Adidas
       </label>
 
       <h3>Rating</h3>
