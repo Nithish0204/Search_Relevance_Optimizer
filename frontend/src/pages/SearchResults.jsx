@@ -9,8 +9,7 @@ import API_BASE_URL from "../config";
 
 function SearchResults() {
 
-  const [searchParams] =
-    useSearchParams();
+  const [searchParams] = useSearchParams();
 
   const query =
     searchParams.get("q") || "";
@@ -31,23 +30,33 @@ function SearchResults() {
 
   useEffect(() => {
 
-    fetch(
-      `${API_BASE_URL}/search?q=${query}`,
-      {
-        headers: {
-          "ngrok-skip-browser-warning":
-            "true"
-        }
+    setLoading(true);
+
+    const url =
+      query === ""
+        ? `${API_BASE_URL}/products`
+        : `${API_BASE_URL}/search?q=${query}`;
+
+    fetch(url, {
+      headers: {
+        "ngrok-skip-browser-warning":
+          "true"
       }
-    )
+    })
       .then((response) =>
         response.json()
       )
       .then((data) => {
 
-        setProducts(
-          data.results || []
-        );
+        if (query === "") {
+          setProducts(
+            data.products || []
+          );
+        } else {
+          setProducts(
+            data.results || []
+          );
+        }
 
         setLoading(false);
 
@@ -85,33 +94,38 @@ function SearchResults() {
       <Navbar />
 
       <h1 className="results-title">
-        Results for "{query}"
+        {query === ""
+          ? "All Products"
+          : `Results for "${query}"`}
       </h1>
+
+      <p
+        style={{
+          textAlign: "center",
+          marginBottom: "10px"
+        }}
+      >
+        {filteredProducts.length} Products Found
+      </p>
 
       <div className="results-layout">
 
         <Filters
-          selectedBrand={
-            selectedBrand
-          }
-          setSelectedBrand={
-            setSelectedBrand
-          }
-          selectedRating={
-            selectedRating
-          }
-          setSelectedRating={
-            setSelectedRating
-          }
+          selectedBrand={selectedBrand}
+          setSelectedBrand={setSelectedBrand}
+          selectedRating={selectedRating}
+          setSelectedRating={setSelectedRating}
         />
 
         <div className="products-container">
 
           {loading ? (
 
-            <h2>
-              Loading...
-            </h2>
+            <h2>Searching...</h2>
+
+          ) : filteredProducts.length === 0 ? (
+
+            <h2>No Products Found</h2>
 
           ) : (
 
@@ -119,12 +133,8 @@ function SearchResults() {
               (product) => (
 
                 <ProductCard
-                  key={
-                    product.id
-                  }
-                  product={
-                    product
-                  }
+                  key={product.id}
+                  product={product}
                 />
 
               )

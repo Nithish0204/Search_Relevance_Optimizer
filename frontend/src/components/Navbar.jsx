@@ -1,29 +1,46 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 function Navbar() {
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <nav className="navbar">
 
-      <div className="logo">
+      <div
+        className="logo"
+        onClick={() => navigate("/")}
+        style={{ cursor: "pointer" }}
+      >
         Search Optimizer
       </div>
 
       <ul className="nav-links">
-        <li>Home</li>
-        <li>Products</li>
-        <li>Analytics</li>
-        <li>About</li>
+
+        <li
+          onClick={() =>
+            navigate("/results?q=")
+          }
+          style={{
+            cursor: "pointer"
+          }}
+        >
+          📦 Products
+        </li>
+
       </ul>
 
-      <button
-        className="login-btn"
-        onClick={() => navigate("/admin-login")}
-      >
-        Admin Login
-      </button>
+      {location.pathname === "/" && (
+        <button
+          className="login-btn"
+          onClick={() =>
+            navigate("/admin-login")
+          }
+        >
+          Admin Login
+        </button>
+      )}
 
     </nav>
   );
