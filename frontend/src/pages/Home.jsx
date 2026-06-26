@@ -1,10 +1,25 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import SearchBar from "../components/SearchBar";
+import API_BASE_URL from "../config";
 
 function Home() {
 
   const navigate = useNavigate();
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/stats`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.categories) {
+          // Take up to 4 categories for the bubbles
+          setCategories(data.categories.slice(0, 4));
+        }
+      })
+      .catch((err) => console.error(err));
+  }, []);
 
   return (
     <div className="home">
@@ -24,43 +39,17 @@ function Home() {
         <SearchBar />
 
         <div className="popular-searches">
-
-          <span
-            onClick={() =>
-              navigate("/results?q=Nike Shoes")
-            }
-            style={{ cursor: "pointer" }}
-          >
-            Nike Shoes
-          </span>
-
-          <span
-            onClick={() =>
-              navigate("/results?q=AirPods")
-            }
-            style={{ cursor: "pointer" }}
-          >
-            AirPods
-          </span>
-
-          <span
-            onClick={() =>
-              navigate("/results?q=Laptops")
-            }
-            style={{ cursor: "pointer" }}
-          >
-            Laptops
-          </span>
-
-          <span
-            onClick={() =>
-              navigate("/results?q=Smart Watches")
-            }
-            style={{ cursor: "pointer" }}
-          >
-            Smart Watches
-          </span>
-
+          {categories.map((category) => (
+            <span
+              key={category}
+              onClick={() =>
+                navigate(`/results?q=${category}`)
+              }
+              style={{ cursor: "pointer" }}
+            >
+              {category}
+            </span>
+          ))}
         </div>
 
       </div>

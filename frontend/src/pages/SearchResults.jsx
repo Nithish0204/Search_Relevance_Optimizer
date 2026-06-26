@@ -28,14 +28,37 @@ function SearchResults() {
     setSelectedRating] =
     useState(0);
 
+  const [brands, setBrands] =
+    useState([]);
+
+  // Fetch dynamic filters from backend stats on load
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/stats`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.brands) {
+          setBrands(data.brands);
+        }
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
   useEffect(() => {
 
     setLoading(true);
 
-    const url =
+    let url =
       query === ""
         ? `${API_BASE_URL}/products`
         : `${API_BASE_URL}/search?q=${query}`;
+        
+    // Append explicit UI filters to the backend request
+    if (selectedBrand) {
+      url += `&brand=${encodeURIComponent(selectedBrand)}`;
+    }
+    if (selectedRating > 0) {
+      url += `&rating=${selectedRating}`;
+    }
 
     fetch(url, {
       headers: {
@@ -69,24 +92,7 @@ function SearchResults() {
 
       });
 
-  }, [query]);
-
-  const filteredProducts =
-    products.filter((product) => {
-
-      const brandMatch =
-        selectedBrand === "" ||
-        product.brand === selectedBrand;
-
-      const ratingMatch =
-        product.rating >=
-        selectedRating;
-
-      return (
-        brandMatch &&
-        ratingMatch
-      );
-    });
+  }, [query, selectedBrand, selectedRating]);
 
   return (
     <div className="results-page">
@@ -105,12 +111,13 @@ function SearchResults() {
           marginBottom: "10px"
         }}
       >
-        {filteredProducts.length} Products Found
+        {products.length} Products Found
       </p>
 
       <div className="results-layout">
 
         <Filters
+          brands={brands}
           selectedBrand={selectedBrand}
           setSelectedBrand={setSelectedBrand}
           selectedRating={selectedRating}
@@ -123,13 +130,13 @@ function SearchResults() {
 
             <h2>Searching...</h2>
 
-          ) : filteredProducts.length === 0 ? (
+          ) : products.length === 0 ? (
 
             <h2>No Products Found</h2>
 
           ) : (
 
-            filteredProducts.map(
+            products.map(
               (product) => (
 
                 <ProductCard

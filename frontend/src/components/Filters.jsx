@@ -1,4 +1,5 @@
 function Filters({
+  brands = [],
   selectedBrand,
   setSelectedBrand,
   selectedRating,
@@ -15,37 +16,23 @@ function Filters({
         <input
           type="radio"
           name="brand"
+          checked={selectedBrand === ""}
           onChange={() => setSelectedBrand("")}
         />
         All Brands
       </label>
 
-      <label>
-        <input
-          type="radio"
-          name="brand"
-          onChange={() => setSelectedBrand("Nike")}
-        />
-        Nike
-      </label>
-
-      <label>
-        <input
-          type="radio"
-          name="brand"
-          onChange={() => setSelectedBrand("Sony")}
-        />
-        Sony
-      </label>
-
-      <label>
-        <input
-          type="radio"
-          name="brand"
-          onChange={() => setSelectedBrand("Adidas")}
-        />
-        Adidas
-      </label>
+      {brands.map((brand) => (
+        <label key={brand}>
+          <input
+            type="radio"
+            name="brand"
+            checked={selectedBrand === brand}
+            onChange={() => setSelectedBrand(brand)}
+          />
+          {brand}
+        </label>
+      ))}
 
       <h3>Rating</h3>
 
@@ -53,6 +40,7 @@ function Filters({
         <input
           type="radio"
           name="rating"
+          checked={selectedRating === 4}
           onChange={() => setSelectedRating(4)}
         />
         4★ & Above
@@ -62,6 +50,7 @@ function Filters({
         <input
           type="radio"
           name="rating"
+          checked={selectedRating === 0}
           onChange={() => setSelectedRating(0)}
         />
         All Ratings

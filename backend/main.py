@@ -128,13 +128,24 @@ def delete_product(product_id: str):
 
 
 @app.get("/search")
-def search_products_route(q: str = Query(..., min_length=1, max_length=200)):
-    cache_key = q.lower().strip()
+def search_products_route(
+    q: str = Query(..., min_length=1, max_length=200),
+    brand: str = Query(None),
+    rating: float = Query(None)
+):
+    cache_key = f"{q.lower().strip()}|{brand}|{rating}"
     cached = get_cached(cache_key)
     if cached:
         return cached
 
     parsed = parse_query(q)
+    
+    # Override NLP if user explicitly selected a UI filter
+    if brand:
+        parsed.brand = brand.lower()
+    if rating:
+        parsed.rating_min = rating
+
     vector = get_query_vector(parsed.keywords, q)
     results = search_products(parsed, vector)
 
@@ -153,8 +164,15 @@ def get_stats():
     total_products = products_collection.count_documents({})
     categories = products_collection.distinct("category")
     brands = products_collection.distinct("brand")
+    
+    # Capitalize for UI display
+    categories_ui = [c.title() for c in categories if c]
+    brands_ui = [b.title() for b in brands if b]
+    
     return {
         "total_products": total_products,
         "total_categories": len(categories),
-        "total_brands": len(brands)
+        "total_brands": len(brands),
+        "categories": categories_ui,
+        "brands": brands_ui
     }
