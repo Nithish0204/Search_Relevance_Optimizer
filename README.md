@@ -30,42 +30,7 @@ Inspired by how Amazon and Flipkart handle natural language queries like *"airpo
 | Fuzzy Match | RapidFuzz | Brand name matching with edit distance |
 | Hybrid Merge | ES RRF (built-in) | Reciprocal Rank Fusion of BM25 + cosine |
 
----
 
-## Project Structure
-
-```
-search-relevance-optimizer/
-├── backend/
-│   ├── main.py                  # FastAPI app, startup, routes
-│   ├── config.py                # .env config via pydantic_settings
-│   ├── models.py                # Product, ParsedQuery Pydantic models
-│   ├── nlp/
-│   │   ├── parser.py            # parse_query(raw) → ParsedQuery  ← YOUR FILE
-│   │   ├── spell.py             # SymSpell wrapper
-│   │   └── entities.py          # price/brand/color/gender extractors
-│   ├── search/
-│   │   ├── es_client.py         # search_products(parsed, vector)  ← YOUR FILE
-│   │   ├── indexer.py           # index_product(id, product, emb)  ← YOUR FILE
-│   │   └── query_builder.py     # build_es_query(parsed, vector) → dict
-│   └── db/
-│       └── mongo.py             # async MongoDB client
-├── frontend/
-│   └── src/
-│       ├── components/
-│       │   ├── SearchBar.jsx
-│       │   ├── ProductCard.jsx
-│       │   └── FilterPanel.jsx
-│       └── api/
-│           └── search.js        # axios calls to FastAPI
-├── scripts/
-│   └── bulk_index.py            # one-time script to index all MongoDB products into ES
-├── .env.example
-├── docker-compose.yml
-└── README.md
-```
-
----
 
 ## Team Roles
 
