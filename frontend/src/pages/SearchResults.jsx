@@ -32,10 +32,16 @@ function SearchResults() {
 
     setLoading(true);
 
-    const url =
-      query === ""
-        ? `${API_BASE_URL}/products`
-        : `${API_BASE_URL}/search?q=${query}`;
+    let url = query === ""
+      ? `${API_BASE_URL}/products?`
+      : `${API_BASE_URL}/search?q=${encodeURIComponent(query)}&`;
+
+    if (selectedBrand) {
+      url += `brand=${encodeURIComponent(selectedBrand)}&`;
+    }
+    if (selectedRating > 0) {
+      url += `rating=${selectedRating}&`;
+    }
 
     fetch(url, {
       headers: {
@@ -69,24 +75,10 @@ function SearchResults() {
 
       });
 
-  }, [query]);
+  }, [query, selectedBrand, selectedRating]);
 
-  const filteredProducts =
-    products.filter((product) => {
-
-      const brandMatch =
-        selectedBrand === "" ||
-        product.brand === selectedBrand;
-
-      const ratingMatch =
-        product.rating >=
-        selectedRating;
-
-      return (
-        brandMatch &&
-        ratingMatch
-      );
-    });
+  // No local filtering needed anymore, backend handles it!
+  const filteredProducts = products;
 
   return (
     <div className="results-page">

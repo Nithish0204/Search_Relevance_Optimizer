@@ -98,9 +98,10 @@ async def seed_and_test():
 
     print("\n4. Running Live Searches on the Database")
     queries = [
-        "sneakers for men under 9000",
-        "boat headphones blue",
-        "mobiles above 15000"
+        "earbuds",
+        "headphones",
+        "mobiles above 15000",
+        "earphons under 4k"
     ]
 
     for q in queries:

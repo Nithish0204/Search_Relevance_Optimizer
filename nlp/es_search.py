@@ -23,10 +23,15 @@ def _build_filters(parsed: ParsedQuery) -> list:
         filters.append({"range": {"price": {"gte": parsed.price_min}}})
     if parsed.brand:
         filters.append({"term": {"brand": parsed.brand.lower()}})
+    if parsed.category:
+        # category is mapped as text with a keyword subfield
+        filters.append({"term": {"category.keyword": parsed.category.lower()}})
     if parsed.gender:
         filters.append({"term": {"gender": parsed.gender}})
     if parsed.color:
         filters.append({"term": {"color": parsed.color}})
+    if parsed.rating_min:
+        filters.append({"range": {"rating": {"gte": parsed.rating_min}}})
 
     return filters
 
@@ -153,7 +158,9 @@ def search_products(parsed: ParsedQuery, query_vector: list) -> list:
         knn_resp  = es.search(index=ES_INDEX, body=knn_query)
 
         bm25_hits = bm25_resp["hits"]["hits"]
-        knn_hits  = knn_resp["hits"]["hits"]
+        # Drop kNN hits with very low cosine similarity to prevent "returning everything"
+        # ES scales cosine to (1 + cosine)/2. A score < 0.65 means cosine < 0.30
+        knn_hits = [hit for hit in knn_resp["hits"]["hits"] if hit["_score"] >= 0.60]
 
         # merge with RRF
         return _reciprocal_rank_fusion(bm25_hits, knn_hits)

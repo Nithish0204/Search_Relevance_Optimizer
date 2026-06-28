@@ -66,9 +66,15 @@ def health_check():
 
 
 @app.get("/products")
-def get_products():
+def get_products(brand: str = None, rating: float = None):
+    query = {}
+    if brand:
+        query["brand"] = brand.lower()
+    if rating is not None:
+        query["rating"] = {"$gte": rating}
+        
     products = []
-    for p in products_collection.find({}):
+    for p in products_collection.find(query):
         p["id"] = str(p["_id"])
         del p["_id"]
         products.append(p)
@@ -128,13 +134,24 @@ def delete_product(product_id: str):
 
 
 @app.get("/search")
-def search_products_route(q: str = Query(..., min_length=1, max_length=200)):
-    cache_key = q.lower().strip()
+def search_products_route(
+    q: str = Query(..., min_length=1, max_length=200),
+    brand: str = None,
+    rating: float = None
+):
+    cache_key = f"{q.lower().strip()}_b:{brand}_r:{rating}"
     cached = get_cached(cache_key)
     if cached:
         return cached
 
     parsed = parse_query(q)
+    
+    # Override with explicit UI filters if provided
+    if brand:
+        parsed.brand = brand
+    if rating is not None:
+        parsed.rating_min = rating
+        
     vector = get_query_vector(parsed.keywords, q)
     results = search_products(parsed, vector)
 
@@ -156,5 +173,7 @@ def get_stats():
     return {
         "total_products": total_products,
         "total_categories": len(categories),
-        "total_brands": len(brands)
+        "total_brands": len(brands),
+        "categories": categories,
+        "brands": brands
     }

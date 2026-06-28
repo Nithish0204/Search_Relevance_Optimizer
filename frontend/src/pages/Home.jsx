@@ -1,10 +1,32 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import SearchBar from "../components/SearchBar";
+import API_BASE_URL from "../config";
 
 function Home() {
 
   const navigate = useNavigate();
+  const [popularCategories, setPopularCategories] = useState([]);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/stats`, {
+      headers: {
+        "ngrok-skip-browser-warning": "true"
+      }
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.categories) {
+          // Capitalize first letter of categories and take top 4
+          const formatted = data.categories
+            .slice(0, 4)
+            .map((c) => c.charAt(0).toUpperCase() + c.slice(1));
+          setPopularCategories(formatted);
+        }
+      })
+      .catch((err) => console.error(err));
+  }, []);
 
   return (
     <div className="home">
@@ -25,41 +47,15 @@ function Home() {
 
         <div className="popular-searches">
 
-          <span
-            onClick={() =>
-              navigate("/results?q=Nike Shoes")
-            }
-            style={{ cursor: "pointer" }}
-          >
-            Nike Shoes
-          </span>
-
-          <span
-            onClick={() =>
-              navigate("/results?q=AirPods")
-            }
-            style={{ cursor: "pointer" }}
-          >
-            AirPods
-          </span>
-
-          <span
-            onClick={() =>
-              navigate("/results?q=Laptops")
-            }
-            style={{ cursor: "pointer" }}
-          >
-            Laptops
-          </span>
-
-          <span
-            onClick={() =>
-              navigate("/results?q=Smart Watches")
-            }
-            style={{ cursor: "pointer" }}
-          >
-            Smart Watches
-          </span>
+          {popularCategories.map((cat) => (
+            <span
+              key={cat}
+              onClick={() => navigate(`/results?q=${encodeURIComponent(cat)}`)}
+              style={{ cursor: "pointer" }}
+            >
+              {cat}
+            </span>
+          ))}
 
         </div>
 

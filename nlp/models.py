@@ -13,6 +13,7 @@ class ParsedQuery(BaseModel):
     color:            Optional[str]   = None
     gender:           Optional[str]   = None
     category:         Optional[str]   = None
+    rating_min:       Optional[float] = None
     corrected_query:  Optional[str]   = None
 
     class Config:
