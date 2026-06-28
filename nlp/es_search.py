@@ -13,9 +13,19 @@ from elasticsearch import Elasticsearch
 from nlp.models import ParsedQuery
 from nlp.config import ES_HOST, ES_INDEX
 
-def _build_filters(parsed: ParsedQuery) -> list:
-    """Build ES filter clauses from ParsedQuery."""
+def _build_filters(parsed: ParsedQuery) -> tuple:
+    """
+    Build ES filter clauses and boost clauses from ParsedQuery.
+    
+    Returns (hard_filters, soft_boosts):
+      - hard_filters: price, brand, gender, color, rating — strict constraints
+      - soft_boosts: category — preference, not exclusion
+    
+    Category is a SOFT BOOST so that "earbuds" ranks earbuds first
+    but also shows related products like headphones.
+    """
     filters = []
+    boosts = []
 
     if parsed.price_max:
         filters.append({"range": {"price": {"lte": parsed.price_max}}})
@@ -24,23 +34,25 @@ def _build_filters(parsed: ParsedQuery) -> list:
     if parsed.brand:
         filters.append({"term": {"brand": parsed.brand.lower()}})
     if parsed.category:
-        # category is mapped as text with a keyword subfield
-        filters.append({"term": {"category.keyword": parsed.category.lower()}})
+        # Category is a SOFT BOOST — ranks matching category higher
+        # but doesn't exclude other categories
+        boosts.append({"term": {"category.keyword": {"value": parsed.category.lower(), "boost": 5}}})
     if parsed.gender:
         filters.append({"term": {"gender": parsed.gender}})
     if parsed.color:
-        filters.append({"term": {"color": parsed.color}})
+        boosts.append({"term": {"color": {"value": parsed.color, "boost": 2}}})
     if parsed.rating_min:
         filters.append({"range": {"rating": {"gte": parsed.rating_min}}})
 
-    return filters
+    return filters, boosts
 
 def _build_bm25_query(parsed: ParsedQuery) -> dict:
     """
     Build BM25 keyword query.
     multi_match on title^3, category^2, description^1 with fuzziness.
+    Category is used as a soft boost (should), not a hard filter.
     """
-    filters     = _build_filters(parsed)
+    filters, boosts = _build_filters(parsed)
     keyword_str = " ".join(parsed.keywords) if parsed.keywords else ""
 
     query = {
@@ -51,11 +63,12 @@ def _build_bm25_query(parsed: ParsedQuery) -> dict:
                     "multi_match": {
                         "query":     keyword_str or "*",
                         "fields":    ["title^3", "category^2", "description^1"],
-                        "fuzziness": "AUTO",
+                        "fuzziness": "AUTO:5,8",  # Only fuzzy-match words ≥5 chars
                         "type":      "best_fields"
                     }
                 },
-                "filter": filters
+                "filter": filters,
+                "should": boosts
             }
         }
     }
@@ -65,8 +78,9 @@ def _build_knn_query(parsed: ParsedQuery, query_vector: list) -> dict:
     """
     Build kNN vector search query.
     Cosine similarity on the embedding field (HNSW index).
+    Only hard filters (price, brand, gender) are applied — not category boost.
     """
-    filters = _build_filters(parsed)
+    filters, _ = _build_filters(parsed)
 
     query = {
         "size": 50,
@@ -78,7 +92,7 @@ def _build_knn_query(parsed: ParsedQuery, query_vector: list) -> dict:
         }
     }
 
-    # apply filters to knn block
+    # apply hard filters to knn block
     if filters:
         query["knn"]["filter"] = {"bool": {"filter": filters}}
 

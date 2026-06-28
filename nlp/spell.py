@@ -20,6 +20,21 @@ def _get_symspell() -> SymSpell:
             importlib_files("symspellpy").joinpath("frequency_dictionary_en_82_765.txt")
         )
         _sym_spell.load_dictionary(dict_path, term_index=0, count_index=1)
+        
+        # Boost our domain-specific words (categories, brands) so they rank higher 
+        # than generic English words during correction (e.g. 'shos' -> 'shoes' instead of 'show')
+        domain_words = set(get_brands()) | set(get_categories())
+        # Also add singulars/plurals of categories
+        extra_words = set()
+        for w in domain_words:
+            if w.endswith('s'):
+                extra_words.add(w[:-1])
+            else:
+                extra_words.add(w + 's')
+        
+        for word in domain_words | extra_words:
+            _sym_spell.create_dictionary_entry(word, 999999999) # extremely high frequency
+
     return _sym_spell
 
 def correct_spelling(text: str) -> str:
