@@ -60,6 +60,44 @@ def set_cache(key: str, value: dict):
     SEARCH_CACHE[key] = (time.time(), value)
 
 
+def clear_cache():
+    SEARCH_CACHE.clear()
+
+@app.on_event("startup")
+def sync_databases_on_startup():
+    """
+    Automatically clean up Elasticsearch on server startup.
+    If the server crashed while deleting a product, this removes the 'ghost' from ES.
+    """
+    from elasticsearch import Elasticsearch
+    from pymongo import MongoClient
+    from nlp.config import MONGO_URI, MONGO_DB, ES_HOST, ES_INDEX
+
+    try:
+        # Get all valid IDs from MongoDB
+        client = MongoClient(MONGO_URI, tlsAllowInvalidCertificates=True)
+        db = client[MONGO_DB]
+        mongo_ids = set(str(p["_id"]) for p in db["products"].find({}, {"_id": 1}))
+
+        # Find and delete orphaned docs in Elasticsearch
+        es = Elasticsearch(ES_HOST)
+        if es.ping():
+            resp = es.search(index=ES_INDEX, body={"size": 1000, "query": {"match_all": {}}})
+            hits = resp["hits"]["hits"]
+            deleted_count = 0
+            
+            for hit in hits:
+                if hit["_id"] not in mongo_ids:
+                    es.delete(index=ES_INDEX, id=hit["_id"])
+                    deleted_count += 1
+            
+            if deleted_count > 0:
+                print(f"🧹 [Auto-Sync] Cleaned up {deleted_count} orphaned products from Elasticsearch.")
+            else:
+                print("✨ [Auto-Sync] Databases are perfectly in sync.")
+    except Exception as e:
+        print(f"⚠️ [Auto-Sync] Failed to sync databases on startup: {e}")
+
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
@@ -98,6 +136,16 @@ def run_index_product(mongo_id: str, product_dict: dict):
     """Wrapper to run the async index_product function in a separate event loop"""
     asyncio.run(index_product(mongo_id, product_dict, None))
 
+def run_delete_es_product(mongo_id: str):
+    """Delete a product from Elasticsearch in background"""
+    from elasticsearch import Elasticsearch
+    from nlp.config import ES_HOST, ES_INDEX
+    try:
+        es = Elasticsearch(ES_HOST)
+        es.delete(index=ES_INDEX, id=mongo_id)
+        print(f"[ES] Deleted {mongo_id}")
+    except Exception as e:
+        print(f"[ES] Failed to delete {mongo_id}: {e}")
 
 @app.post("/products")
 def add_product(product: Product, bg: BackgroundTasks):
@@ -105,11 +153,12 @@ def add_product(product: Product, bg: BackgroundTasks):
     mongo_id = str(result.inserted_id)
     bg.add_task(run_index_product, mongo_id, product.dict())
     bg.add_task(force_refresh)
+    clear_cache()
     return {"success": True, "message": "Product added successfully", "id": mongo_id}
 
 
 @app.put("/products/{product_id}")
-def update_product(product_id: str, product: Product):
+def update_product(product_id: str, product: Product, bg: BackgroundTasks):
     try:
         result = products_collection.update_one(
             {"_id": ObjectId(product_id)},
@@ -119,17 +168,27 @@ def update_product(product_id: str, product: Product):
         raise HTTPException(status_code=400, detail="Invalid product id")
     if result.matched_count == 0:
         return {"success": False, "message": "Product not found"}
+    
+    # Sync with ES and clear cache
+    bg.add_task(run_index_product, product_id, product.dict())
+    bg.add_task(force_refresh)
+    clear_cache()
     return {"success": True, "message": "Product updated successfully"}
 
 
 @app.delete("/products/{product_id}")
-def delete_product(product_id: str):
+def delete_product(product_id: str, bg: BackgroundTasks):
     try:
         result = products_collection.delete_one({"_id": ObjectId(product_id)})
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid product id")
     if result.deleted_count == 0:
         return {"success": False, "message": "Product not found"}
+        
+    # Sync with ES and clear cache
+    bg.add_task(run_delete_es_product, product_id)
+    bg.add_task(force_refresh)
+    clear_cache()
     return {"success": True, "message": "Product deleted successfully"}
 
 
