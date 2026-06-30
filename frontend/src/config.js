@@ -1,5 +1,5 @@
 const API_BASE_URL =
-  "https://shrivel-laborious-aqua.ngrok-free.dev";
+  "http://localhost:8000";
 
 export default API_BASE_URL;
 

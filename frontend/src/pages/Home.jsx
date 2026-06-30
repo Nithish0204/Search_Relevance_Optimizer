@@ -1,7 +1,33 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import SearchBar from "../components/SearchBar";
+import API_BASE_URL from "../config";
 
 function Home() {
+
+  const navigate = useNavigate();
+  const [popularCategories, setPopularCategories] = useState([]);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/stats`, {
+      headers: {
+        "ngrok-skip-browser-warning": "true"
+      }
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.categories) {
+          // Capitalize first letter of categories and take top 4
+          const formatted = data.categories
+            .slice(0, 4)
+            .map((c) => c.charAt(0).toUpperCase() + c.slice(1));
+          setPopularCategories(formatted);
+        }
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
   return (
     <div className="home">
 
@@ -20,10 +46,17 @@ function Home() {
         <SearchBar />
 
         <div className="popular-searches">
-          <span>Nike Shoes</span>
-          <span>AirPods</span>
-          <span>Laptops</span>
-          <span>Smart Watches</span>
+
+          {popularCategories.map((cat) => (
+            <span
+              key={cat}
+              onClick={() => navigate(`/results?q=${encodeURIComponent(cat)}`)}
+              style={{ cursor: "pointer" }}
+            >
+              {cat}
+            </span>
+          ))}
+
         </div>
 
       </div>

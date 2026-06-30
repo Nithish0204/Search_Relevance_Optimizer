@@ -1,0 +1,7 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+elasticsearch-8.12.0/
+elasticsearch-8.12.0-darwin-aarch64.tar.gz
