@@ -568,3 +568,400 @@ body{
 .delete-btn:hover{
   background:#c62828;
 }
+/* PROFESSIONAL PRODUCT CARDS */
+
+.products-container{
+  display:grid;
+  grid-template-columns:
+  repeat(auto-fill,minmax(280px,1fr));
+  gap:25px;
+}
+
+.product-card{
+  background:white;
+  border-radius:18px;
+  overflow:hidden;
+
+  transition:0.3s;
+
+  box-shadow:
+  0 5px 20px rgba(0,0,0,0.08);
+}
+
+.product-card:hover{
+  transform:translateY(-8px);
+
+  box-shadow:
+  0 15px 35px rgba(0,0,0,0.15);
+}
+
+.product-image-container{
+  height:240px;
+  overflow:hidden;
+}
+
+.product-image-container img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+
+  transition:0.4s;
+}
+
+.product-card:hover img{
+  transform:scale(1.08);
+}
+
+.product-info{
+  padding:18px;
+}
+
+.product-info h3{
+  font-size:18px;
+  margin-bottom:10px;
+  color:#222;
+}
+
+.brand-badge{
+  background:#eef3ff;
+  color:#1e3c72;
+
+  padding:5px 12px;
+  border-radius:20px;
+
+  font-size:13px;
+  font-weight:600;
+}
+
+.price{
+  font-size:24px;
+  font-weight:bold;
+  color:#16a34a;
+
+  margin:15px 0;
+}
+
+.rating-stock{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  margin-bottom:15px;
+}
+
+.rating{
+  background:#fff7e6;
+  color:#ff9800;
+
+  padding:6px 10px;
+  border-radius:8px;
+}
+
+.stock{
+  padding:6px 10px;
+  border-radius:8px;
+  font-size:13px;
+}
+
+.in-stock{
+  background:#e8fff0;
+  color:#16a34a;
+}
+
+.out-stock{
+  background:#ffeaea;
+  color:#e53935;
+}
+
+.view-btn{
+  width:100%;
+  border:none;
+
+  background:#1e3c72;
+  color:white;
+
+  padding:12px;
+
+  border-radius:10px;
+  cursor:pointer;
+
+  font-weight:bold;
+}
+
+.view-btn:hover{
+  background:#16315d;
+}
+
+/* FILTERS */
+
+.filter-sidebar{
+  background:white;
+
+  border-radius:15px;
+
+  box-shadow:
+  0 5px 20px rgba(0,0,0,0.08);
+
+  padding:25px;
+}
+
+/* RESULTS HEADER */
+
+.results-title{
+  font-size:38px;
+  font-weight:bold;
+  text-align:center;
+
+  color:#1e3c72;
+}
+
+.results-page{
+  background:#f4f7fc;
+}
+
+/* HOME PAGE */
+
+.search-container{
+  background:white;
+
+  padding:10px;
+
+  border-radius:60px;
+
+  box-shadow:
+  0 10px 30px rgba(0,0,0,0.2);
+}
+
+.search-input{
+  border:none;
+  width:650px;
+}
+
+.popular-searches{
+  display:flex;
+  gap:15px;
+  flex-wrap:wrap;
+  justify-content:center;
+
+  margin-top:35px;
+}
+
+.popular-searches span{
+  background:white;
+  color:#1e3c72;
+
+  font-weight:600;
+
+  padding:12px 22px;
+
+  border-radius:30px;
+}
+/* -------------------------
+   PROFESSIONAL HOME PAGE
+------------------------- */
+
+.home{
+  min-height:100vh;
+
+  background:
+  linear-gradient(
+  135deg,
+  #0f172a,
+  #1e3a8a);
+
+  color:white;
+}
+
+.navbar{
+
+  background:
+  rgba(255,255,255,0.05);
+
+  backdrop-filter:blur(12px);
+
+  border-bottom:
+  1px solid rgba(255,255,255,0.1);
+}
+
+.hero-badge{
+
+  background:
+  rgba(255,255,255,0.15);
+
+  padding:12px 24px;
+
+  border-radius:30px;
+
+  margin-bottom:25px;
+
+  font-weight:600;
+}
+
+.title{
+
+  font-size:78px;
+
+  font-weight:800;
+
+  margin-bottom:15px;
+}
+
+.subtitle{
+
+  font-size:26px;
+
+  color:#dbeafe;
+
+  margin-bottom:40px;
+}
+
+.search-container{
+
+  background:white;
+
+  padding:12px;
+
+  border-radius:60px;
+
+  box-shadow:
+  0 15px 40px rgba(0,0,0,0.25);
+}
+
+.search-input{
+
+  width:700px;
+
+  font-size:20px;
+}
+
+.search-btn{
+
+  background:#2563eb;
+
+  color:white;
+
+  font-weight:700;
+}
+
+.search-btn:hover{
+
+  background:#1d4ed8;
+}
+
+.popular-searches{
+
+  margin-top:40px;
+
+  display:flex;
+
+  flex-wrap:wrap;
+
+  justify-content:center;
+
+  gap:15px;
+}
+
+.popular-searches span{
+
+  background:white;
+
+  color:#1e3c72;
+
+  font-weight:600;
+
+  padding:12px 20px;
+
+  border-radius:25px;
+
+  transition:0.3s;
+}
+
+.popular-searches span:hover{
+
+  transform:translateY(-3px);
+
+  box-shadow:
+  0 10px 20px rgba(0,0,0,0.2);
+}
+.results-page{
+
+  background:#f8fafc;
+}
+
+.results-title{
+
+  font-size:48px;
+
+  font-weight:800;
+
+  color:#1e3a8a;
+}
+
+.filter-sidebar{
+
+  background:white;
+
+  border-radius:18px;
+
+  padding:25px;
+
+  box-shadow:
+  0 10px 25px rgba(0,0,0,0.08);
+}
+
+.products-container{
+
+  display:grid;
+
+  grid-template-columns:
+  repeat(auto-fill,minmax(280px,1fr));
+
+  gap:25px;
+}
+<div className="popular-searches">
+
+  <h3 className="popular-title">
+    🔥 Trending Categories
+  </h3>
+
+  <div className="category-grid">
+
+    {popularCategories.map((cat) => (
+
+      <div
+        key={cat}
+        className="category-card"
+        onClick={() =>
+          navigate(
+            `/results?q=${encodeURIComponent(cat)}`
+          )
+        }
+      >
+
+        <div className="category-icon">
+
+          {cat.toLowerCase().includes("shoe")
+            ? "👟"
+            : cat.toLowerCase().includes("elect")
+            ? "📱"
+            : cat.toLowerCase().includes("cloth")
+            ? "👕"
+            : cat.toLowerCase().includes("watch")
+            ? "⌚"
+            : cat.toLowerCase().includes("laptop")
+            ? "💻"
+            : cat.toLowerCase().includes("book")
+            ? "📚"
+            : "🛍️"}
+
+        </div>
+
+        <p>{cat}</p>
+
+      </div>
+
+    ))}
+
+  </div>
+
+</div>

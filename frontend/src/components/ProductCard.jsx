@@ -2,43 +2,53 @@ function ProductCard({ product }) {
   return (
     <div className="product-card">
 
-      <img
-        src={
-          product.image_url ||
-          "https://placehold.co/300x300?text=No+Image"
-        }
-        alt={product.title}
-      />
+      <div className="product-image-container">
+        <img
+          src={
+            product.image_url ||
+            "https://placehold.co/300x300?text=No+Image"
+          }
+          alt={product.title}
+        />
+      </div>
 
-      <h3>{product.title}</h3>
+      <div className="product-info">
 
-      <p className="price">
-        ₹{product.price}
-      </p>
+        <h3>{product.title}</h3>
 
-      <p>
-        ⭐ {product.rating}
-      </p>
+        <span className="brand-badge">
+          {product.brand}
+        </span>
 
-      <p>
-        Brand: {product.brand}
-      </p>
+        <p className="price">
+          ₹{product.price}
+        </p>
 
-      <p>
-        Category: {product.category}
-      </p>
+        <div className="rating-stock">
 
-      <p>
-        {
-          product.in_stock
-            ? "In Stock"
-            : "Out of Stock"
-        }
-      </p>
+          <span className="rating">
+            ⭐ {product.rating}
+          </span>
 
-      <button>
-        View Product
-      </button>
+          <span
+            className={
+              product.in_stock
+                ? "stock in-stock"
+                : "stock out-stock"
+            }
+          >
+            {product.in_stock
+              ? "In Stock"
+              : "Out of Stock"}
+          </span>
+
+        </div>
+
+        <button className="view-btn">
+          View Product
+        </button>
+
+      </div>
 
     </div>
   );

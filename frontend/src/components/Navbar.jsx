@@ -9,12 +9,12 @@ function Navbar() {
     <nav className="navbar">
 
       <div
-        className="logo"
-        onClick={() => navigate("/")}
-        style={{ cursor: "pointer" }}
-      >
-        Search Optimizer
-      </div>
+  className="logo"
+  onClick={() => navigate("/")}
+  style={{ cursor: "pointer" }}
+>
+  🛍️ SmartSearch
+</div>
 
       <ul className="nav-links">
 
