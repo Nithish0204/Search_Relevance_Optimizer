@@ -7,61 +7,127 @@ import API_BASE_URL from "../config";
 function Home() {
 
   const navigate = useNavigate();
-  const [popularCategories, setPopularCategories] = useState([]);
+
+  const [popularCategories,
+    setPopularCategories] = useState([]);
 
   useEffect(() => {
+
     fetch(`${API_BASE_URL}/stats`, {
       headers: {
-        "ngrok-skip-browser-warning": "true"
+        "ngrok-skip-browser-warning":
+          "true"
       }
     })
       .then((res) => res.json())
       .then((data) => {
+
         if (data.categories) {
-          // Capitalize first letter of categories and take top 4
-          const formatted = data.categories
-            .slice(0, 4)
-            .map((c) => c.charAt(0).toUpperCase() + c.slice(1));
-          setPopularCategories(formatted);
+
+          const formatted =
+            data.categories
+              .slice(0, 8)
+              .map(
+                (c) =>
+                  c.charAt(0).toUpperCase() +
+                  c.slice(1)
+              );
+
+          setPopularCategories(
+            formatted
+          );
+
         }
+
       })
-      .catch((err) => console.error(err));
+      .catch((err) =>
+        console.error(err)
+      );
+
   }, []);
 
   return (
+
     <div className="home">
 
       <Navbar />
 
       <div className="hero">
 
+        <div className="hero-badge">
+          🚀 AI Powered Product Search
+        </div>
+
         <h1 className="title">
-          Search Relevance Optimizer
+          Find Products Smarter
         </h1>
 
         <p className="subtitle">
-          Intelligent E-Commerce Search using NLP, Elasticsearch and Smart Ranking
+          NLP + Elasticsearch + Hybrid Ranking
         </p>
 
         <SearchBar />
 
         <div className="popular-searches">
 
-          {popularCategories.map((cat) => (
-            <span
-              key={cat}
-              onClick={() => navigate(`/results?q=${encodeURIComponent(cat)}`)}
-              style={{ cursor: "pointer" }}
-            >
-              {cat}
-            </span>
-          ))}
+          <h3 className="popular-title">
+            🔥 Trending Categories
+          </h3>
+
+          <div className="category-grid">
+
+            {popularCategories.map(
+              (cat) => (
+
+                <div
+                  key={cat}
+                  className="category-card"
+                  onClick={() =>
+                    navigate(
+                      `/results?q=${encodeURIComponent(
+                        cat
+                      )}`
+                    )
+                  }
+                >
+
+                  <div className="category-icon">
+
+                    {cat.toLowerCase().includes("shoe")
+                      ? "👟"
+                      : cat.toLowerCase().includes("elect")
+                      ? "📱"
+                      : cat.toLowerCase().includes("cloth")
+                      ? "👕"
+                      : cat.toLowerCase().includes("watch")
+                      ? "⌚"
+                      : cat.toLowerCase().includes("laptop")
+                      ? "💻"
+                      : cat.toLowerCase().includes("book")
+                      ? "📚"
+                      : cat.toLowerCase().includes("beauty")
+                      ? "💄"
+                      : cat.toLowerCase().includes("sport")
+                      ? "⚽"
+                      : "🛍️"}
+
+                  </div>
+
+                  <p>{cat}</p>
+
+                </div>
+
+              )
+            )}
+
+          </div>
 
         </div>
 
       </div>
 
     </div>
+
   );
 }
 
